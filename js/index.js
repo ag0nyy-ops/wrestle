@@ -1,7 +1,7 @@
-/* folkstyle: move index · © 2026 Jay · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
+/* folkstyle: move index · © 2026 Jaymz · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
    Builds the page from the same table the game plays with. */
 (() => {
-  const { MOVES, landsText } = HFM;
+  const { MOVES, landsText } = FOLKSTYLE;
   const SECTIONS = [
     ['stand', 'Standing', 'Neither of you is committed to anything. Ties, hip height and hand direction all change the move. If a slot is empty the game uses the resting-hands move, then the move for one tie fewer.'],
     ['lock', 'Body lock and slams', 'You got the lock and your back is arching. You have about two seconds.'],

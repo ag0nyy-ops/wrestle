@@ -2,9 +2,11 @@
 
 # Folkstyle
 
-A wrestling game in the browser. Your sticks are your hands, your triggers are your hips, your bumpers grab wrists.
+An arcade wrestling game in the browser. Your sticks are your hands, your triggers are your hips, your bumpers grab wrists.
 
-**Play:** [ag0nyy-ops.github.io/wrestle](https://ag0nyy-ops.github.io/wrestle/) · **Move index:** [all 139 moves](https://ag0nyy-ops.github.io/wrestle/moves.html)
+**Play:** [ag0nyy-ops.github.io/wrestle](https://ag0nyy-ops.github.io/wrestle/) · **Move index:** [all 139 moves](https://ag0nyy-ops.github.io/wrestle/moves.html) · **More from me:** [ag0nyy-ops.github.io](https://ag0nyy-ops.github.io/)
+
+[![A souplesse off the back arch, under the two conditioning meters](assets/og-image.jpg)](https://ag0nyy-ops.github.io/wrestle/)
 
 ## What's in it
 
@@ -21,15 +23,19 @@ A wrestling game in the browser. Your sticks are your hands, your triggers are y
 
 | Action | Controller | Keyboard |
 | --- | --- | --- |
-| Hands | Left stick (or D-pad) and right stick | WASD and IJKL |
-| Hips | L2 / R2 | Q / O, plus Shift for all the way |
-| Grab a wrist | L1 / R1 | E / U |
+| Left hand | Left stick or D-pad | W A S D |
+| Right hand | Right stick | I J K L |
+| Drop left / right hip | L2 / R2 | Q / O (add Shift for all the way) |
+| Grab a wrist (hold) | L1 / R1 | E / U |
 | Moves | Square / circle / triangle | 1 / 2 / 3 |
 | Get up, break a lock | Mash cross | Mash Space |
-| Walk, circle | Both hands the same way | |
-| Shoot | Hips low, both hands forward | |
+| Walk in or back | Both hands fully up or down | W + I or S + K |
+| Circle | Both hands fully left or right | A + J or D + L |
+| Shoot | Hips low, throw both hands forward | Q + O, then W + I |
+| Sprawl | Pull both hands down as they come in | S + K |
+| Reset, or join as player two | Options | |
 
-A controller or keyboard is needed to play. On a phone it opens on dummy vs dummy.
+Xbox pads work too: square is X, circle is B, triangle is Y, cross is A. A controller or keyboard is needed to play. On a phone it opens on dummy vs dummy.
 
 ## Run locally
 

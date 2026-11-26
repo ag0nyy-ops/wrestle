@@ -1,4 +1,4 @@
-/* folkstyle · © 2026 Jay · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
+/* folkstyle · © 2026 Jaymz · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
    Canvas renderer: camera, arena, mat, shadows, bodies, referee and effects. */
 const cv = $('c'), g = cv.getContext('2d');
 const shade = document.createElement('canvas'), sg = shade.getContext('2d');

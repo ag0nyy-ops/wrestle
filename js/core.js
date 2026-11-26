@@ -1,4 +1,4 @@
-/* folkstyle · © 2026 Jay · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
+/* folkstyle · © 2026 Jaymz · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
    Math and constants shared by the game and the renderer. */
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v, lerp = (a, b, t) => a + (b - a) * t;
