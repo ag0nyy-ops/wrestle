@@ -181,7 +181,7 @@
   A('Sprawl', 'Pull both hands down as they shoot or slip', '+1, you end up on top');
   A('Balance break', 'Grab a wrist and pull until their balance bar fills', '+1');
   A('Drive', 'Push both hands forward to walk into them', 'Moves them toward the line. Lower and fresher wins the push');
-  A('Out of the circle', 'Step, get shoved or get driven past the white line', 'You lose the match');
+  A('Out of the circle', 'Step, get shoved or get driven past the white line', 'Both restart in the center');
   A('Break the lock', 'Caught in a body lock: mash cross / Space', 'Meter fills, you get free');
   A('Escape', 'On the mat: mash cross / Space until the meter fills', '+1 if they were on top');
   A('Near fall', 'They stay on their back 1.4 seconds before getting off it', '+2');

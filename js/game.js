@@ -18,7 +18,7 @@ function fighter(z) {
     lunge: 0, flat: 0, ride: 0, fall: 0, over: 0, arch: 0, lift: 0, breath: Math.random() * 6, effort: [0, 0],
     hands: [null, null], intent: [null, null], grip: [null, null], prevGrip: [false, false], strain: [0, 0], body: null, pose: null, fx: null };
 }
-let F = [fighter(-.68), fighter(.68)], msgT = 0, callT = 0, clock = 120, live = false, over = 0, slow = 0, excite = 0, joined = null;
+let F = [fighter(-.68), fighter(.68)], msgT = 0, callT = 0, clock = 120, live = false, over = 0, slow = 0, hold = 0, excite = 0, joined = null;
 
 const busy = P => !!P.move || P.slip > 0 || P.sprawl > 0 || P.shot > 0 || P.down > 0 || P.top > 0 || P.lock > 0 || P.caught > 0;
 const grounded = P => P.slip > 0 || P.sprawl > 0 || P.down > 0 || P.top > 0;
@@ -31,8 +31,9 @@ const airborne = P => !!(P.fx && !P.fx.archOnly && P.fx.h > .5);
 function nm(i) { return opts.mode === 'watch' ? 'dummy ' + 'ab'[i] : joined !== null ? 'player ' + (i + 1) : i ? 'dummy' : 'you'; }
 const is = (i, one, many) => nm(i) + ' ' + (nm(i) === 'you' ? many : one);
 function say(t, d = 1.6) { $('msg').textContent = t; $('msg').hidden = false; msgT = d; }
-function call(name, sub = '', d = 1.5) {
+function call(name, sub = '', d = 1.5, title = false) {
   const el = $('call');
+  el.classList.toggle('title', title);
   el.querySelector('b').textContent = name; el.querySelector('span').textContent = sub;
   el.hidden = true; void el.offsetWidth; el.hidden = false; callT = d;
 }
@@ -118,7 +119,7 @@ function gather(dt) {
   }
   const watch = opts.mode === 'watch';
   F[0].input = watch ? dummy(0, dt) : a;
-  F[1].input = P[1] && !watch ? readPad(P[1], dt, false) : dummy(1, dt);
+  F[1].input = P[1] && !watch ? readPad(P[1], dt, false) : !live && !watch ? blankIn() : dummy(1, dt);
   $('pad').textContent = P.length ? (P.length > 1 ? '2 controllers: player two is live' : 'controller connected') : 'no controller seen. press a button, or use the keyboard';
 }
 
@@ -128,9 +129,9 @@ function newSeed() { try { return crypto.getRandomValues(new Uint32Array(1))[0];
 function makeBot(seed) {
   const R = rng(seed), rand = (a, b) => a + (b - a) * R();
   const p = { pace: rand(2.4, 6), grab: rand(0, 1), counter: rand(.2, .65), sprawl: rand(.3, .75), stance: rand(.12, .45), amp: rand(.15, .35), mash: rand(6, 8.6), think: rand(.9, 2.2), gap: rand(1.08, 1.35), react: rand(.35, .6), depth: rand(.68, .88),
-    arch: rand(.2, 1), gamble: rand(.08, .3), tank: rand(.82, 1.18), edge: rand(1.9, 2.55), push: rand(.1, .8),
+    arch: rand(.2, 1), gamble: rand(.08, .3), tank: rand(.82, 1.18), edge: rand(1.9, 2.55),
     f: [rand(.6, 2.1), rand(.6, 2.1), rand(.6, 2.1), rand(.6, 2.1), rand(.4, 1.1), rand(.4, 1.1), rand(.35, .9)] };
-  const style = p.arch > .75 ? 'slammer' : p.push > .62 ? 'pusher' : p.pace < 3.4 ? 'shooter' : p.grab > .65 ? 'hand fighter' : p.sprawl > .58 ? 'counter wrestler' : 'all rounder';
+  const style = p.arch > .75 ? 'slammer' : p.pace < 3.4 ? 'shooter' : p.grab > .65 ? 'hand fighter' : p.sprawl > .58 ? 'counter wrestler' : 'all rounder';
   return { seed, R, rand, p, style, tag: seed.toString(16).toUpperCase().padStart(8, '0').slice(0, 4), t: rand(0, 100), atk: rand(1, p.pace), cool: [rand(.2, .9), rand(.2, 1.1)], grab: [0, 0], react: 0, slip: rand(14, 34), mv: rand(.6, p.think * 2), counter: null, stance: null, guard: null, rate: 0, press: 0, hit: 0, gas: false, dir: R() < .5 ? 1 : -1, shape: null };
 }
 let bots = [makeBot(newSeed()), makeBot(newSeed())];
@@ -223,8 +224,6 @@ function dummy(i, dt) {
   o.circle = w(t * q[6]) > .5 ? ai.dir : w(t * q[6]) < -.65 ? -ai.dir : 0;
   if (R() < dt * .15) ai.dir *= -1;
   if (ai.gas) { o.walk = gap < 1.5 ? -1 : 0; }
-  // some of them like to walk you out
-  if (!ai.gas && (radius(you) > 1.5 && w(t * 1.3 + p.push * 9) < p.push * 1.7 - .6 || w(t * .8 + p.push * 5) < p.push - .85)) o.walk = 1;
   // tired legs lose track of the line
   const r = radius(me);
   if (r > p.edge + (1 - me.cond) * .45) {
@@ -257,8 +256,8 @@ function dummy(i, dt) {
   // pick a move: mostly one that would land, sometimes a gamble, locks first if this one likes to throw
   if (!ai.gas && (ai.mv -= dt) < 0 && gap < 1.55) {
     const all = choices(me, you, 'stand').filter(c => me.cond > c.m.cost), good = all.filter(c => c.ok);
-    const locks = good.filter(c => c.m.to === 'lock'), shoves = (radius(you) > 1.25 ? all : []).filter(c => c.m.shove);
-    const c = shoves.length && R() < .25 + p.push * .7 ? pickOne(shoves) : locks.length && R() < .35 + p.arch * .6 ? pickOne(locks) : R() < p.gamble ? pickOne(all) : good.length ? pickOne(good) : null;
+    const locks = good.filter(c => c.m.to === 'lock');
+    const c = locks.length && R() < .35 + p.arch * .6 ? pickOne(locks) : R() < p.gamble ? pickOne(all) : good.length ? pickOne(good) : null;
     if (c) { press(o, c); o.grip = me.grip.map(x => x !== null); ai.mv = p.think * ai.rand(1.1, 2.4); } else ai.mv = .3;
   }
   return o;
@@ -267,7 +266,8 @@ function dummy(i, dt) {
 /* ---------- state changes ---------- */
 function clearGround() { F.forEach(P => { P.slip = P.down = P.sprawl = P.top = P.shot = P.up = P.floor = P.gcd = P.guard = P.bal = P.lock = P.caught = 0; P.move = P.gm = null; P.grip = [null, null]; P.tried = false; }); }
 function toStomach(a, d) { clearGround(); d.slip = a.sprawl = 1; d.downed = true; d.armed = false; }
-function toBack(a, d) { clearGround(); d.down = a.top = 1; d.downed = true; d.armed = false; }
+let lastPin = Math.random() * 4 | 0;
+function toBack(a, d) { clearGround(); lastPin = (lastPin + 1 + (Math.random() * (PINS.length - 1) | 0)) % PINS.length; a.pin = d.pin = lastPin; d.down = a.top = 1; d.downed = true; d.armed = false; }
 function startLock(a, d) { clearGround(); a.lock = d.caught = 2.1; d.shove = V(); SFX.arch(); call('back arch', nm(F.indexOf(a)) + ' locked up', .9); }
 
 /* ---------- animation of a landed move ---------- */
@@ -298,9 +298,16 @@ function finish(winner, text, kind) {
   if (over > 0) return;
   over = 4.2; live = false; ref.win = winner; excite = 1;
   say(text, 4.2);
-  if (kind === 'pin') { ref.slam = .001; call('pin', is(winner, 'wins', 'win') + ' by fall', 3); }
-  else if (kind === 'out') { SFX.whistle(2); SFX.crowd(.8); call('out of the circle', is(winner, 'wins', 'win'), 3); }
-  else { SFX.buzzer(); call(kind === 'time' ? 'time' : 'tech fall', winner === null ? 'tie' : is(winner, 'wins', 'win'), 3); }
+  if (kind === 'pin') { ref.slam = .001; call('pin', is(winner, 'wins', 'win') + ' by fall', 3, true); }
+  else { SFX.buzzer(); call(kind === 'time' ? 'time' : 'tech fall', winner === null ? 'tie' : is(winner, 'wins', 'win'), 3, true); }
+}
+
+// score, clock and gas carry over; positions don't
+function restart(i) {
+  clearGround(); FX.clear();
+  F.forEach((P, j) => Object.assign(P, { pos: V(0, 0, j ? .68 : -.68), drop: [0, 0], lean: V(), shove: V(), fx: null, rest: .35, lunge: 0, flat: 0, ride: 0, fall: 0, over: 0, arch: 0, lift: 0, hands: [null, null], intent: [null, null] }));
+  live = false; hold = 1.2;
+  say(nm(i) + ' stepped out: back to the center', 2); SFX.whistle(2);
 }
 
 // a standing move, a lock slam or a counter has just worked
@@ -367,6 +374,17 @@ function ground(P, O, i, gm) {
 }
 
 /* ---------- simulation ---------- */
+// points are [forward, height, side]. hs and ss turn the hips and shoulders, feet places each foot
+const PINS = [
+  // half: chest to chest from the hips up
+  { top: { hip: [.2, .42], chest: [.62, .46], head: [.82, .6], foot: -.45 }, under: { hip: [-.05, .2], chest: [-.48, .18], head: [-.74, .2], foot: .46 } },
+  // crossbody: laid across their chest
+  { top: { hip: [1.12, .3, .62], chest: [1.14, .42, .04], head: [1.14, .45, -.32], hs: [.15, 0], ss: [.22, 0], feet: [[.88, .06, 1.12], [1.36, .06, 1.06]] }, under: { hip: [-.05, .2], chest: [-.48, .18], head: [-.74, .2], foot: .46 } },
+  // mount: sat up over them
+  { top: { hip: [.9, .42], chest: [.98, .78], head: [1.1, .99], feet: [[.6, .05, -.44], [.6, .05, .44]] }, under: { hip: [-.05, .2], chest: [-.48, .18], head: [-.74, .2], foot: .52 } },
+  // cradle: their knees folded up to their head
+  { top: { hip: [.5, .46, .46], chest: [.9, .5, .34], head: [1.1, .64, .16], feet: [[.14, .05, .34], [.34, .05, .8]] }, under: { hip: [-.08, .27], chest: [-.46, .2], head: [-.62, .36], feet: [[-.42, .62, -.22], [-.36, .56, .26]] } }
+];
 function frame(i) { const d = norm(sub(F[1 - i].pos, F[i].pos)); return { f: d, r: V(d.z, 0, -d.x) }; }
 function skeleton(P, i) {
   const { f, r } = frame(i), up = V(0, 1, 0), [dl, dr] = P.drop, sink = (dl + dr) / 2;
@@ -386,13 +404,14 @@ function skeleton(P, i) {
   const pose = (p, t, fwd, y, side = 0) => mix(p, add(add(add(P.pos, mul(f, fwd)), mul(r, side)), V(0, y, 0)), t);
   let hc = hipC, ch = chest, hd = head;
   const lead = P.single === 1 ? [-.6, .38] : [.38, -.6];
-  for (const [t, q] of [[P.lunge, { hip: [0, .4], chest: [.34, .66], head: [.52, .82], foot: lead }], [P.flat, { hip: [-.05, .2], chest: [-.48, .18], head: [-.74, .2], foot: .46 }], [P.ride, { hip: [.2, .42], chest: [.62, .46], head: [.82, .6], foot: -.45 }], [P.fall, { hip: [-.08, .43], chest: [.38, .46], head: [.62, .46], foot: -.46 }], [P.over, { hip: [-.3, .5], chest: [.28, .84], head: [.5, .94], foot: -1.08 }]]) {
+  for (const [t, q] of [[P.lunge, { hip: [0, .4], chest: [.34, .66], head: [.52, .82], foot: lead }], [P.flat, PINS[P.pin || 0].under], [P.ride, PINS[P.pin || 0].top], [P.fall, { hip: [-.08, .43], chest: [.38, .46], head: [.62, .46], foot: -.46 }], [P.over, { hip: [-.3, .5], chest: [.28, .84], head: [.5, .94], foot: -1.08 }]]) {
     if (t < .001) continue;
-    hc = pose(hc, t, q.hip[0], q.hip[1]); ch = pose(ch, t, ...q.chest); hd = pose(hd, t, ...q.head);
+    hc = pose(hc, t, ...q.hip); ch = pose(ch, t, ...q.chest); hd = pose(hd, t, ...q.head);
+    const hs = q.hs || [0, .15], ss = q.ss || [0, .22], turn = (p, axis, s, w) => pose(p, t, w[0] + s * axis[0], w[1], (w[2] || 0) + s * axis[1]);
     [-1, 1].forEach((s, k) => {
-      hip[k] = pose(hip[k], t, q.hip[0], q.hip[1], s * .15);
-      sh[k] = pose(sh[k], t, q.chest[0], q.chest[1], s * .22);
-      foot[k] = pose(foot[k], t, Array.isArray(q.foot) ? q.foot[k] : q.foot, .04, s * .28);
+      hip[k] = turn(hip[k], hs, s, q.hip);
+      sh[k] = turn(sh[k], ss, s, q.chest);
+      foot[k] = pose(foot[k], t, ...(q.feet ? q.feet[k] : [Array.isArray(q.foot) ? q.foot[k] : q.foot, .04, s * .28]));
     });
   }
   // the back arch: hips drive in, chest and head go back over the heels
@@ -616,10 +635,10 @@ function step(dt) {
     F[0].pos = add(F[0].pos, mul(dir, w0)); F[1].pos = sub(F[1].pos, mul(dir, 1 - w0));
     if (gap < 0 && total) F.forEach(P => spend(P, .02 * dt));
   }
-  // over the line loses
-  if (over <= 0) {
+  // over the line: nobody wins it, they go again from the middle
+  if (over <= 0 && !F.some(airborne)) {
     const [a, b] = F.map(radius);
-    if (Math.max(a, b) > RING) { const loser = a > b ? 0 : 1; finish(1 - loser, nm(loser) + ' stepped out. ' + is(1 - loser, 'wins', 'win'), 'out'); }
+    if (Math.max(a, b) > RING) restart(a > b ? 0 : 1);
   }
   F.forEach((P, i) => P.body = skeleton(P, i));
   // where each player wants each hand
@@ -730,7 +749,10 @@ function refWorld(p, base, u, v) { const w = a => add(add(add(base, mul(u, a[0])
 function refMix(a, b, t) { return { hip: mix(a.hip, b.hip, t), chest: mix(a.chest, b.chest, t), head: mix(a.head, b.head, t), hand: [0, 1].map(k => mix(a.hand[k], b.hand[k], t)), foot: [0, 1].map(k => mix(a.foot[k], b.foot[k], t)) }; }
 function stepRef(dt) {
   const { f, r } = frame(0), mid = mix(F[0].pos, F[1].pos, .5), down = F.some(P => P.down > 0);
-  const home = add(add(mid, mul(r, down ? -1.15 : -1.5)), mul(f, .35));
+  // well clear of the tie-ups: which way counts as "to the side" depends on the camera
+  const wide = opts.cam === 'side', tight = W < H ? (wide ? .95 : .65) : 1;
+  let home = add(add(mid, mul(r, (wide ? -1.5 : -2.15) * (down ? .85 : 1))), mul(f, (wide ? 1.7 : -.6) * tight));
+  const far = Math.hypot(home.x, home.z); if (far > 3.6) home = mul(home, 3.6 / far);
   if (!ref.slam) ref.at = ref.at ? mix(ref.at, home, Math.min(1, dt * 3)) : home;
   ref.low = lerp(ref.low, down ? 1 : 0, Math.min(1, dt * 7));
   let p = refMix(refWorld(REF.stand, ref.at, r, f), refWorld(REF.crouch, ref.at, r, f), ref.low);
@@ -746,8 +768,12 @@ function stepRef(dt) {
   if (ref.slam) {
     // hop, belly flop beside the pin, then slap the mat three times
     const t = ref.slam += dt, flat = a => norm(V(a.x, 0, a.z)), side = flat(C.rt), deep = flat(C.fw), narrow = W < H;
-    const spot = add(add(mid, mul(side, narrow ? .35 : 1.15)), mul(deep, narrow ? -.85 : -.25));
-    const from = ref.pose || p, air = refWorld(REF.leap, mix(ref.at, spot, .65), mul(side, -1), deep), land_ = refWorld(REF.flat, spot, mul(side, -1), deep);
+    // flop on whichever side of the pin has room, and far enough out to miss it
+    const across = F.flatMap(P => P.pose ? [P.pose.head, P.pose.chest, ...P.pose.knee, ...P.pose.foot] : []).map(p => dot(sub(p, mid), side));
+    const way = ref.way ||= Math.max(...across) <= -Math.min(...across) ? 1 : -1;
+    const out = narrow ? .35 : clamp(Math.max(...across.map(a => a * way)) + 1, 1.15, 1.6);
+    const spot = add(add(mid, mul(side, way * out)), mul(deep, narrow ? -.85 : -.25));
+    const from = ref.pose || p, air = refWorld(REF.leap, mix(ref.at, spot, .65), mul(side, -way), deep), land_ = refWorld(REF.flat, spot, mul(side, -way), deep);
     if (t < .28) p = refMix(from.start || (from.start = p), air, Math.sin(t / .28 * Math.PI / 2));
     else if (t < .46) p = refMix(air, land_, ((t - .28) / .18) ** 2);
     else { p = land_; if (t < 1.5) { const lift = Math.abs(Math.sin((t - .46) / 1.04 * Math.PI * 3)); p.hand[1] = add(p.hand[1], V(0, .7 * lift, 0)); } }
@@ -760,14 +786,14 @@ function stepRef(dt) {
       ref.beats++;
     }
     // back to the feet and raise the winner
-    if (t > 2 && ref.win !== null) p = refMix(land_, raised(ref.win, add(add(mid, mul(side, narrow ? .6 : 1.25)), mul(deep, .2))), Math.min(1, (t - 2) / .45));
+    if (t > 2 && ref.win !== null) p = refMix(land_, raised(ref.win, add(add(mid, mul(side, way * (narrow ? .6 : Math.max(1.25, out)))), mul(deep, .2))), Math.min(1, (t - 2) / .45));
   }
   ref.now = p;
 }
 
 /* ---------- loop and ui ---------- */
 function reset() {
-  ref = newRef(); bots = [makeBot(newSeed()), makeBot(newSeed())]; clock = 120; live = false; over = 0; slow = 0;
+  ref = newRef(); bots = [makeBot(newSeed()), makeBot(newSeed())]; clock = 120; live = false; over = 0; slow = 0; hold = 0;
   const s = F.map(P => P.input); F = [fighter(-.68), fighter(.68)]; F.forEach((P, i) => P.input = s[i]); F.forEach((P, i) => { P.body = skeleton(P, i); }); F.forEach(P => P.pose = figure(P));
   FX.clear(); $('call').hidden = true; say('reset', .8);
 }
@@ -780,7 +806,7 @@ for (const [id] of SEGMENTS) $(id).addEventListener('click', e => {
   sync(); b.blur();
 });
 $('reset').addEventListener('click', e => { reset(); e.target.blur(); });
-addEventListener('gamepaddisconnected', e => delete padState[e.gamepad.index]);
+addEventListener('gamepaddisconnected', e => { delete padState[e.gamepad.index]; if (e.gamepad.index === joined) joined = null; });
 
 const GLYPH = { sq: '□', ci: '○', tri: '△' };
 const WHERE = { stand: 'standing', counter: 'they are shooting', lock: 'body lock', top: 'on top', pin: 'pinning', bottom: 'underneath', back: 'on your back', locked: 'caught' };
@@ -818,7 +844,7 @@ function hud() {
 let last = performance.now(), T = 0;
 function match(dt) {
   if (over > 0) { if ((over -= dt) <= 0) reset(); return; }
-  if (!live && (opts.mode === 'watch' || F[0].input.h.some(h => Math.hypot(h.x, h.y) > .5) || F[0].input.drop.some(d => d > .3))) { live = true; SFX.whistle(1); }
+  if (!live && !hold && (opts.mode === 'watch' || F.some(({ input: n }) => n.h.some(h => Math.hypot(h.x, h.y) > .5) || n.drop.some(d => d > .3) || n.grip.some(Boolean) || n.sq || n.ci || n.tri || n.mash))) { live = true; SFX.whistle(1); }
   if (live) clock = Math.max(0, clock - dt);
   const [a, b] = [F[0].score, F[1].score];
   const tech = Math.abs(a - b) >= 15;
@@ -830,7 +856,10 @@ function match(dt) {
 function clockFace() { const c = Math.ceil(clock); $('clock').textContent = Math.floor(c / 60) + ':' + String(c % 60).padStart(2, '0'); }
 function tick(dt) {
   T += dt;
-  gather(dt); match(dt); clockFace();
+  gather(dt);
+  // a beat of stillness after a restart
+  if (hold > 0) { hold = Math.max(0, hold - dt); F.forEach(P => P.input = blankIn()); }
+  match(dt); clockFace();
   const sim = slow > 0 ? dt * .45 : dt; slow = Math.max(0, slow - dt);
   if (over <= 0) step(sim);
   else F.forEach(P => { if (!P.fx) return; P.pose = figure(P); if ((P.fx.t += sim) >= P.fx.dur) { if (!P.fx.archOnly) impact(P, P.fx.k); P.fx = null; P.pose = figure(P); } });

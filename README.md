@@ -11,7 +11,8 @@ A wrestling game in the browser. Your sticks are your hands, your triggers are y
 - 139 entries in the move index: ties, shots, throws, counters, body lock slams, rides, turns, pins and escapes
 - Body locks that put your back into an arch, then suplexes and slams off it
 - A conditioning meter: nobody gets to go 100% for two whole minutes
-- Four ways to lose: stepping out of the circle, two seconds on your back, a 15 point tech fall, or the clock
+- Three ways to lose: two seconds on your back, a 15 point tech fall, or the clock
+- Step out of the circle and you both restart in the center
 - Dummies rolled from a random seed (slammer, shooter, pusher, hand fighter, counter wrestler, all rounder), including dummy vs dummy
 - A referee with a wristband on each arm who takes pins very personally
 - Sound made in the browser, no audio files

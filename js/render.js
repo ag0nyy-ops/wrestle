@@ -105,6 +105,7 @@ function drawMat() {
 }
 
 /* ---------- bodies ---------- */
+const RIM = '#dcdcdc';
 // a tapered, shaded limb between two screen circles
 function tube(p, q, r1, r2, tone, edge = 1.5) {
   const dx = q.x - p.x, dy = q.y - p.y, d = Math.hypot(dx, dy), R = Math.max(r1, r2, .5);
@@ -115,6 +116,8 @@ function tube(p, q, r1, r2, tone, edge = 1.5) {
     const a = Math.atan2(dy, dx), o = Math.acos((r1 - r2) / d);
     g.arc(p.x, p.y, r1, a + o, a - o + Math.PI * 2); g.arc(q.x, q.y, r2, a - o, a + o); g.closePath();
   }
+  // no tone: just the rim, painted underneath a whole body
+  if (!tone) { g.strokeStyle = RIM; g.lineWidth = edge * 2; g.stroke(); return; }
   if (typeof tone === 'string') g.fillStyle = tone;
   else {
     let grad;
@@ -131,10 +134,12 @@ function tube(p, q, r1, r2, tone, edge = 1.5) {
   if (edge) { g.strokeStyle = '#050505'; g.lineWidth = edge * 2; g.stroke(); }
   g.fill();
 }
-function builder(parts, shadows) {
+function builder(parts, shadows, rim) {
   const part = (a, b, ra, rb, tone, o = {}) => {
     const p = pr(a), q = pr(b);
-    parts.push({ z: (p.z + q.z) / 2 + (o.bias || 0), draw: () => { tube(p, q, ra * p.k, rb * q.k, tone, o.edge ?? 1.2); if (o.then) o.then(p, q); } });
+    const z = (p.z + q.z) / 2 + (o.bias || 0);
+    if (rim) rim.push({ z, p, q, ra: ra * p.k, rb: rb * q.k });
+    parts.push({ z, draw: () => { tube(p, q, ra * p.k, rb * q.k, tone, o.edge ?? 1.2); if (o.then) o.then(p, q); } });
     if (o.cast !== false) shadows.push([a, b, (ra + rb) / 2]);
   };
   const ball = (a, r, tone, o) => part(a, a, r, r, tone, o);
@@ -279,7 +284,14 @@ function draw() {
   if (!calm.matches && FX.shake > 0) { const k = FX.shake * FX.shake * 11; g.translate(Math.sin(T * 91) * k, Math.cos(T * 73) * k); }
   drawCrowd(); drawMat();
   const parts = [], shadows = [], b = builder(parts, shadows);
-  F.forEach((P, i) => { if (P.pose) wrestler(b, P.pose, i); });
+  F.forEach((P, i) => {
+    if (!P.pose) return;
+    if (!i) return wrestler(b, P.pose, i);
+    // the dark one gets a light outline: stroke his whole shape first, then paint him over it
+    const rim = [];
+    wrestler(builder(parts, shadows, rim), P.pose, i);
+    parts.push({ z: Math.max(...rim.map(s => s.z)) + .01, draw: () => rim.forEach(s => tube(s.p, s.q, s.ra, s.rb, null, 3.1)) });
+  });
   if (ref.now) official(b, ref.now);
   drawShadows(shadows);
   if (opts.mode !== 'watch' && !airborne(F[0])) ring(V(F[0].pos.x, 0, F[0].pos.z), .36, 'rgba(236,236,236,.4)', 1.5);

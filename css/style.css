@@ -66,7 +66,8 @@ canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block
 .atmosphere.fixed::after { opacity: .045; }
 #msg { position: absolute; left: 50%; top: 14px; transform: translateX(-50%) rotate(-2deg); border: 1.5px solid var(--fg); background: var(--bg); padding: .4rem .7rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; width: max-content; max-width: 92%; text-align: center; }
 #call { position: absolute; left: 16px; top: 52px; max-width: 46%; text-align: left; pointer-events: none; transform-origin: left top; animation: jdx-stamp .28s cubic-bezier(.2, 1.6, .4, 1) both; }
-#call b { display: block; margin-bottom: 6px; font: 400 clamp(1.7rem, 4.4vw, 3.8rem)/1 var(--goth); text-transform: capitalize; text-shadow: 0 0 18px #000, 0 3px 0 #000, -2px 0 #000, 2px 0 #000; }
+#call b { display: block; margin-bottom: 6px; font: 600 clamp(1.3rem, 3.1vw, 2.6rem)/1.1 var(--mono); letter-spacing: -.03em; text-transform: capitalize; text-shadow: 0 0 18px #000, 0 3px 0 #000, -2px 0 #000, 2px 0 #000; }
+#call.title b { font: 400 clamp(1.7rem, 4.4vw, 3.8rem)/1 var(--goth); letter-spacing: normal; }
 #call span { display: inline-block; background: var(--fg); color: var(--bg); padding: 3px 10px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
 #call span:empty { display: none; }
 @keyframes jdx-stamp { from { opacity: 0; transform: scale(1.7) rotate(-5deg); } to { opacity: 1; transform: scale(1) rotate(-2deg); } }
