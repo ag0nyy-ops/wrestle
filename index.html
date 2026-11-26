@@ -1,0 +1,93 @@
+<!doctype html>
+<!-- hand fight · © 2026 Jay · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE) -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hand Fight — jay.</title>
+  <meta name="description" content="A wrestling game in the browser. Your sticks are your hands, your triggers are your hips.">
+  <meta name="theme-color" content="#060606">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/ibm-plex-mono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/unifrakturmaguntia-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a class="skip" href="#mat">Skip to the mat</a>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <p class="label"><a href="/">jay.</a> / the mat</p>
+      <h1>Hand Fight</h1>
+    </div>
+    <nav aria-label="Pages"><a class="btn" href="moves.html" target="_blank" rel="noopener">Move index</a></nav>
+  </header>
+
+  <div id="board" aria-label="Scoreboard">
+    <span class="side l"><b id="sw0">you</b><small>green</small></span><strong id="sc0">0</strong><div id="clock" role="timer">2:00</div><strong id="sc1">0</strong><span class="side"><b id="sw1">dummy</b><small>red</small></span>
+  </div>
+  <div class="tanks" aria-label="Conditioning">
+    <div class="tank"><span>conditioning <b id="cn0">100</b></span><div class="gauge"><i id="c0"></i><u id="cap0"></u></div></div>
+    <div class="tank"><span>conditioning <b id="cn1">100</b></span><div class="gauge"><i id="c1"></i><u id="cap1"></u></div></div>
+  </div>
+
+  <main class="stage" id="mat" tabindex="-1">
+    <canvas id="c" role="img" aria-label="Two wrestlers and a referee on a mat"></canvas>
+    <div class="atmosphere" aria-hidden="true"></div>
+    <div id="msg" role="status" hidden></div>
+    <div id="call" aria-hidden="true" hidden><b></b><span></span></div>
+    <p id="hear" hidden>click or press a key for sound</p>
+  </main>
+  <div id="moves" aria-label="What your buttons do right now"></div>
+  <p id="pad" role="status">no controller seen. press a button, or use the keyboard</p>
+
+  <div class="row">
+    <div class="seg" id="mode"><em>Dummy</em><button id="m-still" data-v="still">Still</button><button id="m-move" data-v="move">Moving</button><button id="m-fight" data-v="fight">Fights back</button><button id="m-watch" data-v="watch">Dummy vs dummy</button></div>
+    <div class="seg" id="cam"><em>View</em><button id="v-behind" data-v="behind">Behind</button><button id="v-side" data-v="side">Side</button></div>
+    <div class="seg" id="coach"><em>Coach</em><button id="a-on" data-v="on">On</button><button id="a-off" data-v="off">Off</button></div>
+    <div class="seg" id="sound"><em>Sound</em><button id="s-on" data-v="on">On</button><button id="s-off" data-v="off">Off</button></div>
+    <div class="seg" id="lh"><em>Left hand</em><button id="h-stick" data-v="stick">Stick</button><button id="h-dpad" data-v="dpad">D-pad</button></div>
+    <button id="reset">Reset</button>
+  </div>
+
+  <div class="read">
+    <div class="card"><b id="n0">you</b><span>off balance</span><div class="bar"><i id="b0"></i></div><span>grip</span><div class="bar"><i id="s0"></i></div><span>left hip</span><div class="bar"><i id="l0"></i></div><span>right hip</span><div class="bar"><i id="r0"></i></div></div>
+    <div class="card"><b id="n1">dummy</b><span>off balance</span><div class="bar"><i id="b1"></i></div><span>grip</span><div class="bar"><i id="s1"></i></div><span>left hip</span><div class="bar"><i id="l1"></i></div><span>right hip</span><div class="bar"><i id="r1"></i></div></div>
+  </div>
+
+  <section aria-labelledby="how">
+    <p class="label">file 01 / how it plays</p>
+    <h2 id="how">Your sticks are your hands.</h2>
+    <ul class="rules">
+      <li><b>Moves change with you.</b> Square, circle and triangle do something different for every tie, hip height and hand direction. The bar under the mat shows what they do right now. With coach on, the filled ones would land.</li>
+      <li><b>The arch.</b> Get a body lock and your back arches. Pick a slam before the lock slips. Caught in one? Mash and drop your hips.</li>
+      <li><b>Gas.</b> Everything costs conditioning and the ceiling sinks as the match goes. Stand easy with no ties to get it back.</li>
+      <li><b>Ways to lose.</b> Step past the white line, stay on your back for two seconds, fall 15 points behind, or be behind when the clock dies.</li>
+    </ul>
+    <details id="help"><summary>Controls</summary><div class="tw"><table>
+      <tr><th>Action</th><th>Controller</th><th>Keyboard</th></tr>
+      <tr><td>Left hand</td><td>Left stick or D-pad</td><td>W A S D</td></tr>
+      <tr><td>Right hand</td><td>Right stick</td><td>I J K L</td></tr>
+      <tr><td>Drop left / right hip</td><td>L2 / R2</td><td>Q / O (add Shift for all the way)</td></tr>
+      <tr><td>Grab a wrist (hold)</td><td>L1 / R1</td><td>E / U</td></tr>
+      <tr><td>Moves</td><td>Square / circle / triangle</td><td>1 / 2 / 3</td></tr>
+      <tr><td>Get up, break a lock</td><td>Mash cross</td><td>Mash Space</td></tr>
+      <tr><td>Walk in or back</td><td>Both hands fully up or down</td><td>W + I or S + K</td></tr>
+      <tr><td>Circle</td><td>Both hands fully left or right</td><td>A + J or D + L</td></tr>
+      <tr><td>Shoot</td><td>Hips low, throw both hands forward</td><td>Q + O, then W + I</td></tr>
+      <tr><td>Sprawl</td><td>Pull both hands down as they come in</td><td>S + K</td></tr>
+      <tr><td>Slip (bad)</td><td>Both triggers all the way</td><td>Shift + Q + O</td></tr>
+      <tr><td>Reset, or join as player two</td><td>Options</td><td></td></tr>
+    </table></div></details>
+    <p class="fine">Xbox pads work too: square is X, circle is B, triangle is Y, cross is A. Every move and what beats it is in the <a href="moves.html" target="_blank" rel="noopener">move index</a>.</p>
+  </section>
+
+  <footer><span>© 2026 Jaymz</span><span>source viewable, not reusable (<a href="https://github.com/ag0nyy-ops/wrestle">code and licence</a>)</span></footer>
+</div>
+<script src="js/core.js"></script>
+<script src="js/moves.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/render.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
