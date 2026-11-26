@@ -1,4 +1,4 @@
-/* folkstyle · © 2026 Jay · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
+/* folkstyle · © 2026 Jaymz · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
    Every move in the game. The game and the move index both read this file, so they can't disagree. */
 (() => {
   const level = P => (P.drop[0] + P.drop[1]) / 2;
@@ -215,5 +215,5 @@
   const lands = (m, P, O) => !m.lands || m.lands.some(s => s.split('+').every(c => COND[c][1](O, P)));
   const landsText = m => m.lands.map(s => s.split('+').map(c => COND[c][0]).join(' and ')).join(', or ');
 
-  window.HFM = { MOVES, COND, find, lands, landsText, level };
+  window.FOLKSTYLE = { MOVES, COND, find, lands, landsText, level };
 })();
