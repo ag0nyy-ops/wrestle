@@ -1,4 +1,4 @@
-/* hand fight: move index · © 2026 Jay · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
+/* folkstyle: move index · © 2026 Jay · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
    Builds the page from the same table the game plays with. */
 (() => {
   const { MOVES, landsText } = HFM;

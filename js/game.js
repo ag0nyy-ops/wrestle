@@ -1,7 +1,7 @@
-/* hand fight · © 2026 Jay · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
+/* folkstyle · © 2026 Jay · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
    Rules, input, dummies, referee and the page controls. */
 const { find: findMove, lands, level } = HFM;
-const STORE = 'handfight3';
+const STORE = 'folkstyle';
 
 const opts = { mode: 'fight', lh: 'stick', cam: 'behind', coach: 'on', sound: 'on' };
 let fresh = true;

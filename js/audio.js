@@ -1,4 +1,4 @@
-/* hand fight · © 2026 Jay · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
+/* folkstyle · © 2026 Jay · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
    Every sound is built in the browser from noise and oscillators. No audio files. */
 const SFX = (() => {
   let ac = null, out = null, hiss = null, enabled = true;

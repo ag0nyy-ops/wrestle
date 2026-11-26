@@ -1,4 +1,4 @@
-/* hand fight · © 2026 Jay · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
+/* folkstyle · © 2026 Jay · https://ag0nyy-ops.github.io/wrestle/ · source viewable, not reusable (LICENSE)
    Every move in the game. The game and the move index both read this file, so they can't disagree. */
 (() => {
   const level = P => (P.drop[0] + P.drop[1]) / 2;
